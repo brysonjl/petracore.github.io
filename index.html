@@ -2,20 +2,20 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Petracore | Inbound</title>
+  <title>Petracore</title>
   <link rel="icon" type="image/png" href="favicon.png">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <!-- Include Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600&family=Montserrat:wght@300;500&display=swap">
 
   <!-- CSS -->
   <style>
     :root {
       --bg: #121317;
       --text: #f3f5f7;
-      --accent: #4da6ff;
+      --accent: #bea77d;
     }
 
     * { margin:0; padding:0; box-sizing: border-box; }
@@ -40,7 +40,7 @@
     }
 
     .logo {
-      width: 180px;
+      width: 250px;
       opacity: 0.9;
       animation: float 5s ease-in-out infinite;
       position: relative;
@@ -48,12 +48,81 @@
     }
 
     .tagline {
-      margin-top: 1rem;
-      font-size: 1.5rem;
+      margin-top: 0.5rem;
+      font-size: 4rem;
       letter-spacing: 0.2rem;
       opacity: 0.9;
       position: relative;
       z-index: 2;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 300;
+    }
+    
+    .tagline:first-of-type {
+      font-weight: 500;
+      font-size: 1.8rem;
+      margin-top: 1rem;
+    }
+
+    .loading-container {
+      position: relative;
+      display: flex;
+      justify-content: center;
+      margin-top: 1rem;
+      width: 100%;
+    }
+    
+    .loading-dot {
+      position: relative;
+      margin: 0 6px;
+      width: 12px;
+      height: 12px;
+      border-radius: 50% 50% 50% 50% / 50% 50% 50% 50%;
+      transform: rotate(180deg);
+      background-color: var(--accent);
+      opacity: 0;
+      transform-origin: center bottom;
+      animation: launch 3s infinite;
+    }
+    
+    .loading-dot:nth-child(1) {
+      animation-delay: 0s;
+    }
+    
+    .loading-dot:nth-child(2) {
+      animation-delay: 0.5s;
+    }
+    
+    .loading-dot:nth-child(3) {
+      animation-delay: 1s;
+    }
+    
+    @keyframes launch {
+      0% { 
+        opacity: 0; 
+        transform: translateY(0) scale(0.5) rotate(180deg); 
+      }
+      20% { 
+        opacity: 1; 
+        transform: translateY(0) scale(1) rotate(180deg); 
+      }
+      50% { 
+        opacity: 0.7; 
+        transform: translateY(-20px) scale(1.2) rotate(180deg); 
+      }
+      80% { 
+        opacity: 0; 
+        transform: translateY(-40px) scale(0.8) rotate(180deg); 
+      }
+      100% { 
+        opacity: 0; 
+        transform: translateY(-50px) scale(0.5) rotate(180deg); 
+      }
+    }
+    
+    .inbound-text {
+      position: relative;
+      display: inline-block;
     }
 
     @keyframes float {
@@ -61,14 +130,14 @@
       50% { transform: translateY(-10px); }
     }
 
-    .cursor-spotlight {
-      position: fixed;
-      width: 300px; height: 300px;
-      background: radial-gradient(circle, rgba(77,166,255,0.1), transparent 70%);
-      pointer-events: none;
-      transform: translate(-50%, -50%);
-      transition: transform 0.05s ease-out;
+    .parallax-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
       z-index: 1;
+      pointer-events: none;
     }
   </style>
 </head>
@@ -76,13 +145,19 @@
 <body>
 
   <canvas id="particles"></canvas>
+  <div class="parallax-container" id="parallax"></div>
 
-  <img src="logo.png" alt="Petracore Logo" class="logo">
-  <div class="tagline">Petracore Inbound...</div>
+  <img src="logo.png" alt="Petracore" class="logo">
+  <div class="tagline">PETRACORE</div>
+  <div class="tagline">INBOUND</div>
+  <br>
+  <div class="loading-container">
+    <div class="loading-dot"></div>
+    <div class="loading-dot"></div>
+    <div class="loading-dot"></div>
+  </div>
 
-  <div class="cursor-spotlight" id="spotlight"></div>
-
-  <!-- JS for particle background and cursor spotlight -->
+  <!-- JS for particle background -->
   <script>
     const canvas = document.getElementById('particles');
     const ctx = canvas.getContext('2d');
@@ -91,6 +166,8 @@
 
     const particles = [];
     const particleCount = 150;
+    const connectionDistance = 150;
+    const colors = ['rgba(77,166,255,', 'rgba(200,200,200,', 'rgba(100,120,150,'];
 
     class Particle {
       constructor() {
@@ -100,15 +177,19 @@
       reset() {
         this.x = Math.random() * canvas.width;
         this.y = Math.random() * canvas.height;
-        this.vx = (Math.random() - 0.5) * 0.4;
-        this.vy = Math.random() * 0.6 + 0.3;
-        this.size = Math.random() * 2 + 1;
-        this.alpha = Math.random() * 0.5 + 0.2;
-        this.type = Math.random() > 0.5 ? 'rain' : 'stone';
+        this.vx = (Math.random() - 0.5) * 0.3;
+        this.vy = (Math.random() - 0.5) * 0.3;
+        this.size = Math.random() * 1.5 + 0.5;
+        this.alpha = Math.random() * 0.3 + 0.1;
+        this.colorIndex = Math.floor(Math.random() * colors.length);
+        // For parallax effect
+        this.parallaxFactor = Math.random() * 0.05 + 0.02;
+        this.originalX = this.x;
+        this.originalY = this.y;
       }
 
       draw() {
-        ctx.fillStyle = this.type === 'rain' ? `rgba(77,166,255,${this.alpha})` : `rgba(200,200,200,${this.alpha})`;
+        ctx.fillStyle = `${colors[this.colorIndex]}${this.alpha})`;
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
         ctx.fill();
@@ -118,15 +199,112 @@
         this.x += this.vx;
         this.y += this.vy;
 
-        if(this.y > canvas.height || this.x < 0 || this.x > canvas.width) this.reset();
+        // Bounce off edges
+        if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
+        if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
+        
+        // Occasionally change direction slightly
+        if (Math.random() < 0.01) {
+          this.vx += (Math.random() - 0.5) * 0.1;
+          this.vy += (Math.random() - 0.5) * 0.1;
+          
+          // Keep speed in check
+          const speed = Math.sqrt(this.vx * this.vx + this.vy * this.vy);
+          if (speed > 0.5) {
+            this.vx = (this.vx / speed) * 0.5;
+            this.vy = (this.vy / speed) * 0.5;
+          }
+        }
+        
+        // Particle lifespan and regeneration
+        if (Math.random() < 0.0005) {
+          this.reset();
+        }
+        
+        // Update original position for parallax reference
+        this.originalX = this.x;
+        this.originalY = this.y;
+      }
+      
+      // Apply parallax effect based on mouse position
+      applyParallax(mouseX, mouseY) {
+        const centerX = canvas.width / 2;
+        const centerY = canvas.height / 2;
+        
+        // Calculate normalized mouse position (-1 to 1)
+        const normalizedX = (mouseX - centerX) / centerX;
+        const normalizedY = (mouseY - centerY) / centerY;
+        
+        // Apply parallax offset based on factor
+        this.x = this.originalX + (normalizedX * this.parallaxFactor * 5);
+        this.y = this.originalY + (normalizedY * this.parallaxFactor * 5);
       }
     }
 
+    // Create particles
     for(let i=0; i<particleCount; i++) particles.push(new Particle());
+
+    function drawConnections() {
+      for (let i = 0; i < particles.length; i++) {
+        for (let j = i + 1; j < particles.length; j++) {
+          const dx = particles[i].x - particles[j].x;
+          const dy = particles[i].y - particles[j].y;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+          
+          if (distance < connectionDistance) {
+            const opacity = 1 - (distance / connectionDistance);
+            ctx.strokeStyle = `rgba(77,166,255,${opacity * 0.2})`;
+            ctx.lineWidth = 0.5;
+            ctx.beginPath();
+            ctx.moveTo(particles[i].x, particles[i].y);
+            ctx.lineTo(particles[j].x, particles[j].y);
+            ctx.stroke();
+          }
+        }
+      }
+    }
+    
+    // Track mouse position for parallax
+    let mouseX = canvas.width / 2;
+    let mouseY = canvas.height / 2;
+    
+    document.addEventListener('mousemove', (e) => {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+    });
+    
+    document.addEventListener('touchmove', (e) => {
+      const touch = e.touches[0];
+      mouseX = touch.clientX;
+      mouseY = touch.clientY;
+    }, {passive: true});
 
     function animate() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      particles.forEach(p => { p.update(); p.draw(); });
+      
+      // Update particle positions
+      particles.forEach(p => { 
+        p.update();
+        // Apply parallax effect
+        p.applyParallax(mouseX, mouseY);
+      });
+      
+      // Check if we need to add more particles
+      if (particles.length < particleCount) {
+        const particlesToAdd = particleCount - particles.length;
+        for (let i = 0; i < particlesToAdd; i++) {
+          particles.push(new Particle());
+        }
+      }
+      
+      // Draw connections between particles
+      drawConnections();
+      
+      // Draw particles
+      particles.forEach(p => { 
+        p.draw(); 
+      });
+      
       requestAnimationFrame(animate);
     }
 
@@ -136,17 +314,6 @@
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
     });
-
-    // Cursor Spotlight Effect
-    const spotlight = document.getElementById('spotlight');
-    document.addEventListener('mousemove', (e) => {
-      spotlight.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
-    });
-
-    document.addEventListener('touchmove', (e) => {
-      const touch = e.touches[0];
-      spotlight.style.transform = `translate(${touch.clientX}px, ${touch.clientY}px)`;
-    }, {passive:true});
   </script>
 </body>
 </html>
