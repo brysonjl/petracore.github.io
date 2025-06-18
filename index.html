@@ -60,8 +60,47 @@
     
     .tagline:first-of-type {
       font-weight: 500;
-      font-size: 1.8rem;
+      font-size: 4rem;
       margin-top: 1rem;
+    }
+    
+    /* Responsive design for different screen sizes */
+    @media (max-width: 768px) {
+      .logo {
+        width: 180px;
+      }
+      
+      .tagline, .tagline:first-of-type {
+        font-size: 3rem;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .logo {
+        width: 150px;
+      }
+      
+      .tagline, .tagline:first-of-type {
+        font-size: 2rem;
+        letter-spacing: 0.15rem;
+      }
+      
+      .loading-dot {
+        width: 10px;
+        height: 10px;
+        margin: 0 5px;
+      }
+    }
+    
+    @media (max-width: 320px) {
+      .logo {
+        width: 120px;
+      }
+      
+      .tagline, .tagline:first-of-type {
+        font-size: 1.5rem;
+        letter-spacing: 0.1rem;
+      }
     }
 
     .loading-container {
@@ -164,9 +203,17 @@
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
+    // Adjust particle count based on screen size
+    let particleCount = 150;
+    if (window.innerWidth <= 768) {
+      particleCount = 100;
+    }
+    if (window.innerWidth <= 480) {
+      particleCount = 70;
+    }
+
     const particles = [];
-    const particleCount = 150;
-    const connectionDistance = 150;
+    let connectionDistance = window.innerWidth <= 480 ? 100 : 150;
     const colors = ['rgba(77,166,255,', 'rgba(200,200,200,', 'rgba(100,120,150,'];
 
     class Particle {
@@ -313,6 +360,26 @@
     window.addEventListener('resize', () => {
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
+      
+      // Adjust particle count on resize
+      let newParticleCount = 150;
+      if (window.innerWidth <= 768) {
+        newParticleCount = 100;
+      }
+      if (window.innerWidth <= 480) {
+        newParticleCount = 70;
+      }
+      
+      // Update connection distance
+      connectionDistance = window.innerWidth <= 480 ? 100 : 150;
+      
+      // Adjust particle count if needed
+      if (newParticleCount !== particleCount) {
+        particleCount = newParticleCount;
+        // Reset particles array with new count
+        particles.length = 0;
+        for(let i=0; i<particleCount; i++) particles.push(new Particle());
+      }
     });
   </script>
 </body>
